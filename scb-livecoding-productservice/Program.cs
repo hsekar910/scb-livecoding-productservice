@@ -46,7 +46,8 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("admin", policy => policy.RequireClaim("write:product"));
+    options.AddPolicy("admin", policy => policy.RequireAssertion(context =>
+        context.User.HasClaim(c => c.Type == "permissions" && c.Value == "write:product")));
 });
 
 // Add CORS policy
