@@ -1,0 +1,6 @@
+@scb_livecoding_productservice_HostAddress = http://localhost:5166
+
+GET {{scb_livecoding_productservice_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
