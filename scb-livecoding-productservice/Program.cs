@@ -46,8 +46,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("readonly", policy => policy.RequireClaim("permissions", "read:product"));
-    options.AddPolicy("readwrite", policy => policy.RequireClaim("permissions", "read:product", "write:product"));
+    options.AddPolicy("admin", policy => policy.RequireClaim("write:product"));
 });
 
 // Add CORS policy
