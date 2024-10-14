@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using scb_livecoding_productservice.Models;
 using scb_livecoding_productservice.Service;
 
 namespace scb_livecoding_productservice.Controllers
 {
+    [Authorize(Policy = "readonly")]
     [Route("[controller]")]
     [ApiController]
     public class ProductController : ControllerBase
@@ -34,6 +36,7 @@ namespace scb_livecoding_productservice.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy= "readwrite")]
         public async Task<IActionResult> Post(Product newProduct)
         {
             await _productService.CreateAsync(newProduct);
@@ -58,6 +61,7 @@ namespace scb_livecoding_productservice.Controllers
             return NoContent();
         }
 
+        [Authorize(Policy = "readwrite")]
         [HttpDelete("{id:length(24)}")]
         public async Task<IActionResult> Delete(string id)
         {

@@ -1,5 +1,9 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using scb_livecoding_productservice;
 using scb_livecoding_productservice.Models;
 using scb_livecoding_productservice.Service;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +19,36 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+var jwtSettings = new JwtSettings();
+builder.Configuration.GetSection("JwtSettings").Bind(jwtSettings);
+builder.Services.AddSingleton(jwtSettings);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.Authority = jwtSettings.Authority;
+    options.Audience = jwtSettings.Audience;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings.Issuer,
+        ValidAudience = jwtSettings.Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
+    };
+});
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("readonly", policy => policy.RequireClaim("permissions", "read:product"));
+    options.AddPolicy("readwrite", policy => policy.RequireClaim("permissions", "read:product", "write:product"));
+});
 
 // Add CORS policy
 // Read allowed origins from configuration
@@ -47,6 +81,7 @@ app.UseHttpsRedirection();
 // Use CORS middleware
 app.UseCors("AllowSpecificOrigin");
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
